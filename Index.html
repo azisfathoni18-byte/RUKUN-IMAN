@@ -1,0 +1,1025 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Petualangan 6 Bintang Iman - SDN KUNINGAN 03</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Fredoka for a playful, kid-friendly look -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <!-- Custom Tailwind Configuration for Colors and Fonts -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Fredoka', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        skybg: '#87CEEB',
+                        cloud: '#FFFFFF'
+                    },
+                    boxShadow: {
+                        'btn': '0 4px 0 0 rgba(0, 0, 0, 0.2)',
+                        'btn-active': '0 0px 0 0 rgba(0, 0, 0, 0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #87CEEB; /* Sky blue */
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        /* Animated Clouds Background */
+        .clouds-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 200"><path fill="%23ffffff" fill-opacity="0.6" d="M100 100 Q 150 50 200 100 Q 250 80 300 100 Q 350 70 400 110 Q 450 60 500 100 Q 550 50 600 100 Q 650 80 700 100 Q 750 70 800 110 Q 850 60 900 100 L 900 200 L 100 200 Z"></path></svg>') repeat-x;
+            background-size: 50% 30%;
+            background-position: bottom;
+            animation: moveClouds 60s linear infinite;
+            z-index: -1;
+            opacity: 0.7;
+        }
+
+        @keyframes moveClouds {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Bouncing Animation for Stars */
+        .animate-bounce-slow {
+            animation: bounceSlow 2s infinite;
+        }
+        @keyframes bounceSlow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Pop Animation for Feedback */
+        .animate-pop {
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Button Press Effect */
+        .btn-3d {
+            transition: all 0.1s;
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: none !important;
+        }
+
+        .star-active { color: #F59E0B; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8)); }
+        .star-inactive { color: #D1D5DB; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+    </style>
+</head>
+<body class="text-slate-800 h-screen w-screen flex items-center justify-center relative">
+
+    <div class="clouds-bg"></div>
+
+    <!-- Main Game Container -->
+    <div id="app-container" class="w-full max-w-lg h-full sm:h-[90vh] bg-white sm:rounded-3xl shadow-2xl overflow-hidden relative flex flex-col border-4 border-white/50 backdrop-blur-sm bg-white/90">
+        
+        <div id="screen-splash" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-skybg text-white transition-opacity duration-500">
+            <i class="ph-fill ph-star text-7xl text-yellow-300 animate-bounce-slow drop-shadow-lg mb-4"></i>
+            <h1 class="text-4xl font-bold text-center drop-shadow-md px-4 leading-tight">PETUALANGAN<br>6 BINTANG IMAN</h1>
+            <p class="mt-4 text-xl font-medium drop-shadow-md">SDN KUNINGAN 03</p>
+            <div class="mt-8 flex items-center gap-2">
+                <div class="w-3 h-3 bg-white rounded-full animate-ping"></div>
+                <div class="w-3 h-3 bg-white rounded-full animate-ping" style="animation-delay: 0.2s"></div>
+                <div class="w-3 h-3 bg-white rounded-full animate-ping" style="animation-delay: 0.4s"></div>
+            </div>
+            <p id="loading-text" class="mt-4 text-sm font-medium">Memuat Game...</p>
+        </div>
+
+        <div id="screen-menu" class="hidden flex-col items-center justify-center h-full p-6 w-full">
+            <div class="text-center mb-8">
+                <div class="flex justify-center mb-2 gap-1">
+                    <i class="ph-fill ph-star text-3xl text-yellow-400"></i>
+                    <i class="ph-fill ph-star text-4xl text-yellow-400 -mt-2"></i>
+                    <i class="ph-fill ph-star text-3xl text-yellow-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-primary mb-2">BINTANG IMAN</h1>
+                <p class="text-md text-gray-600 font-medium bg-gray-100 py-1 px-4 rounded-full inline-block">SDN KUNINGAN 03</p>
+            </div>
+
+            <div class="w-full flex flex-col gap-4">
+                <button onclick="navTo('screen-mode-select')" class="btn-3d w-full bg-secondary text-white py-4 rounded-2xl font-bold text-xl shadow-btn hover:bg-emerald-400 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-rocket-launch"></i> REGISTRASI & MAIN
+                </button>
+                <button onclick="navTo('screen-objectives')" class="btn-3d w-full bg-orange-500 text-white py-3 rounded-2xl font-bold text-lg shadow-btn hover:bg-orange-400 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-target"></i> TUJUAN PEMBELAJARAN
+                </button>
+                <button onclick="navTo('screen-leaderboard')" class="btn-3d w-full bg-purple-500 text-white py-3 rounded-2xl font-bold text-lg shadow-btn hover:bg-purple-400 flex items-center justify-center gap-2 mt-2">
+                    <i class="ph-bold ph-trophy"></i> PAPAN SKOR
+                </button>
+                <button onclick="navTo('screen-instructions')" class="btn-3d w-full bg-blue-400 text-white py-3 rounded-2xl font-bold text-lg shadow-btn hover:bg-blue-300 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-book-open"></i> PETUNJUK
+                </button>
+            </div>
+        </div>
+
+        <div id="screen-mode-select" class="hidden flex-col items-center justify-center h-full p-6 w-full">
+            <div class="flex justify-between items-center w-full mb-8 absolute top-6 left-0 px-6">
+                <button onclick="navTo('screen-menu')" class="p-2 bg-white rounded-full shadow text-gray-600 hover:bg-gray-100">
+                    <i class="ph-bold ph-arrow-left text-xl"></i>
+                </button>
+                <div class="w-10"></div>
+            </div>
+            
+            <h2 class="text-3xl font-bold text-primary mb-8 text-center drop-shadow-sm">PILIH MODE</h2>
+            
+            <div class="w-full flex flex-col gap-6">
+                <button onclick="navTo('screen-register', {mode: 'solo'})" class="btn-3d w-full bg-emerald-500 text-white py-6 rounded-3xl font-bold text-2xl shadow-btn hover:bg-emerald-400 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 opacity-20"><i class="ph-fill ph-user text-9xl"></i></div>
+                    <i class="ph-fill ph-user text-5xl mb-1 relative z-10"></i>
+                    <span class="relative z-10">MAIN SOLO</span>
+                </button>
+                <button onclick="navTo('screen-register', {mode: 'duel'})" class="btn-3d w-full bg-orange-500 text-white py-6 rounded-3xl font-bold text-2xl shadow-btn hover:bg-orange-400 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
+                    <div class="absolute -left-4 -bottom-4 opacity-20"><i class="ph-fill ph-users text-9xl"></i></div>
+                    <i class="ph-fill ph-users text-5xl mb-1 relative z-10"></i>
+                    <span class="relative z-10">MODE DUEL</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="screen-objectives" class="hidden flex-col h-full p-6 w-full bg-orange-50/50">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="navTo('screen-menu')" class="p-2 bg-white rounded-full shadow text-gray-600 hover:bg-gray-100">
+                    <i class="ph-bold ph-arrow-left text-xl"></i>
+                </button>
+                <h2 class="text-xl font-bold text-orange-600 text-center">TUJUAN PEMBELAJARAN</h2>
+                <div class="w-10"></div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto pb-4">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-orange-100">
+                    <div class="text-center mb-4">
+                        <i class="ph-fill ph-target text-6xl text-orange-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Mata Pelajaran: PAI dan BP<br><span class="text-primary">Fase A (Kelas 1 SD)</span></h3>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-orange-50 p-4 rounded-2xl flex gap-3 items-start">
+                            <i class="ph-fill ph-check-circle text-orange-500 text-2xl flex-shrink-0 mt-1"></i>
+                            <p class="text-gray-700 font-medium">Peserta didik dapat <b class="text-orange-600">menyebutkan</b> Rukun Iman dengan benar.</p>
+                        </div>
+                        <div class="bg-emerald-50 p-4 rounded-2xl flex gap-3 items-start">
+                            <i class="ph-fill ph-check-circle text-emerald-500 text-2xl flex-shrink-0 mt-1"></i>
+                            <p class="text-gray-700 font-medium">Peserta didik dapat <b class="text-emerald-600">menjelaskan</b> makna 6 Rukun Iman secara sederhana.</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-2xl flex gap-3 items-start">
+                            <i class="ph-fill ph-check-circle text-blue-500 text-2xl flex-shrink-0 mt-1"></i>
+                            <p class="text-gray-700 font-medium">Peserta didik <b class="text-blue-600">meyakini</b> kebenaran Rukun Iman sebagai dasar agama Islam.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-register" class="hidden flex-col h-full p-6 w-full bg-blue-50/50">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="navTo('screen-mode-select')" class="p-2 bg-white rounded-full shadow text-gray-600 hover:bg-gray-100">
+                    <i class="ph-bold ph-arrow-left text-xl"></i>
+                </button>
+                <h2 class="text-2xl font-bold text-primary" id="reg-title">REGISTRASI</h2>
+                <div class="w-10"></div> <!-- spacer -->
+            </div>
+
+            <div class="flex-1 overflow-y-auto pb-4">
+                <div id="player1-form" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4">
+                    <h3 class="font-bold text-lg mb-4 text-emerald-600 flex items-center gap-2">
+                        <i class="ph-fill ph-user-circle"></i> Pemain 1
+                    </h3>
+                    <input type="text" id="p1-name" placeholder="Nama Panggilan" class="w-full mb-3 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-lg">
+                    <div class="flex gap-3">
+                        <input type="text" id="p1-class" placeholder="Kelas (1A/1B)" class="w-1/2 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary">
+                        <input type="number" id="p1-absen" placeholder="No. Absen" class="w-1/2 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary">
+                    </div>
+                </div>
+
+                <div id="player2-form" class="hidden bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4">
+                    <h3 class="font-bold text-lg mb-4 text-orange-500 flex items-center gap-2">
+                        <i class="ph-fill ph-user-circle"></i> Pemain 2
+                    </h3>
+                    <input type="text" id="p2-name" placeholder="Nama Panggilan" class="w-full mb-3 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 text-lg">
+                    <div class="flex gap-3">
+                        <input type="text" id="p2-class" placeholder="Kelas (1A/1B)" class="w-1/2 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-orange-400">
+                        <input type="number" id="p2-absen" placeholder="No. Absen" class="w-1/2 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-orange-400">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="initGame()" class="btn-3d w-full bg-primary text-white py-4 rounded-2xl font-bold text-xl shadow-btn mt-auto flex items-center justify-center gap-2">
+                MULAI PETUALANGAN <i class="ph-bold ph-rocket-launch"></i>
+            </button>
+        </div>
+
+        <div id="screen-instructions" class="hidden flex-col h-full p-6 w-full bg-white">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="navTo('screen-menu')" class="p-2 bg-gray-100 rounded-full shadow-sm text-gray-600 hover:bg-gray-200">
+                    <i class="ph-bold ph-arrow-left text-xl"></i>
+                </button>
+                <h2 class="text-2xl font-bold text-primary">PETUNJUK GIM</h2>
+                <div class="w-10"></div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto space-y-4 pr-2">
+                <div class="flex items-start gap-3 bg-blue-50 p-4 rounded-xl">
+                    <div class="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                    <p class="text-gray-700">Masukkan nama dan data diri sebelum bermain.</p>
+                </div>
+                <div class="flex items-start gap-3 bg-yellow-50 p-4 rounded-xl">
+                    <div class="bg-yellow-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                    <p class="text-gray-700">Baca pertanyaan dengan teliti. Waktu menjawab <b>15 detik</b>.</p>
+                </div>
+                <div class="flex items-start gap-3 bg-emerald-50 p-4 rounded-xl">
+                    <div class="bg-emerald-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                    <p class="text-gray-700">Pilih jawaban yang paling tepat. Jawaban benar mendapat <b>+10 Poin</b> dan mengumpulkan <b>Bintang Iman</b>.</p>
+                </div>
+                <div class="flex items-start gap-3 bg-red-50 p-4 rounded-xl">
+                    <div class="bg-red-400 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">4</div>
+                    <p class="text-gray-700">Jika salah, pelajari penjelasan yang muncul agar makin pintar!</p>
+                </div>
+                <div class="flex items-start gap-3 bg-purple-50 p-4 rounded-xl">
+                    <div class="bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">5</div>
+                    <p class="text-gray-700">Selesaikan 12 soal (Solo) atau 10 soal (Duel) untuk melihat gelarmu!</p>
+                </div>
+            </div>
+            
+            <button onclick="navTo('screen-menu')" class="btn-3d w-full bg-primary text-white py-3 mt-4 rounded-2xl font-bold text-lg shadow-btn">
+                MENGERTI!
+            </button>
+        </div>
+
+        <div id="screen-game" class="hidden flex-col h-full w-full bg-sky-50">
+            <!-- Header Status -->
+            <div class="bg-white p-4 shadow-sm rounded-b-3xl z-10 flex flex-col gap-3 border-b-4 border-blue-100">
+                
+                <!-- Duel Top Bar (Hidden in Solo) -->
+                <div id="duel-header" class="hidden w-full flex justify-between items-center bg-gray-100 rounded-xl p-2 mb-2">
+                    <div id="duel-p1-card" class="flex flex-col items-center px-3 py-1 rounded-lg border-2 border-transparent">
+                        <span id="duel-p1-name" class="font-bold text-emerald-600 text-sm truncate w-20 text-center">P1</span>
+                        <span class="text-xs font-bold bg-emerald-100 text-emerald-700 px-2 rounded-full"><span id="duel-p1-score">0</span> ⭐</span>
+                    </div>
+                    <div class="text-xl font-black text-gray-400 italic">VS</div>
+                    <div id="duel-p2-card" class="flex flex-col items-center px-3 py-1 rounded-lg border-2 border-transparent">
+                        <span id="duel-p2-name" class="font-bold text-orange-500 text-sm truncate w-20 text-center">P2</span>
+                        <span class="text-xs font-bold bg-orange-100 text-orange-700 px-2 rounded-full"><span id="duel-p2-score">0</span> ⭐</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <div id="solo-score-container" class="flex flex-col">
+                        <span class="text-xs text-gray-500 font-bold uppercase tracking-wider">Skor</span>
+                        <span id="game-score" class="text-2xl font-black text-primary">0</span>
+                    </div>
+                    
+                    <div class="flex gap-1" id="star-container">
+                        <!-- Stars injected here -->
+                    </div>
+
+                    <div class="flex flex-col items-end">
+                        <span class="text-xs text-gray-500 font-bold uppercase tracking-wider">Waktu</span>
+                        <div class="flex items-center gap-1 text-red-500">
+                            <i class="ph-fill ph-clock text-xl"></i>
+                            <span id="game-timer" class="text-2xl font-black">15</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                    <div id="game-progress" class="bg-green-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="text-center text-xs font-bold text-gray-400 mt-1" id="game-question-counter">Soal 1 / 12</div>
+            </div>
+
+            <!-- Question Area -->
+            <div class="flex-1 flex flex-col p-4 overflow-y-auto">
+                <div id="turn-indicator" class="hidden text-center mb-3">
+                    <span class="bg-orange-100 text-orange-600 font-bold px-4 py-1 rounded-full text-sm animate-pulse">
+                        Giliran: <span id="turn-name">Pemain 1</span>
+                    </span>
+                </div>
+                
+                <div class="bg-white p-5 rounded-3xl shadow-md border-2 border-blue-50 text-center mb-6 min-h-[120px] flex items-center justify-center">
+                    <h2 id="question-text" class="text-xl font-bold text-gray-800 leading-snug">Memuat pertanyaan...</h2>
+                </div>
+
+                <div id="options-container" class="flex flex-col gap-3 pb-4">
+                    <!-- Options injected here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="feedback-modal" class="hidden absolute inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div id="feedback-card" class="bg-white rounded-3xl w-full max-w-sm p-6 text-center transform scale-90 opacity-0 transition-all duration-300 shadow-2xl">
+                <div id="feedback-icon" class="text-6xl mb-2 mx-auto"></div>
+                <h2 id="feedback-title" class="text-3xl font-black mb-2">BENAR!</h2>
+                <div class="bg-gray-50 p-4 rounded-2xl mb-6">
+                    <p id="feedback-explanation" class="text-gray-700 font-medium leading-relaxed"></p>
+                </div>
+                <div id="feedback-points" class="text-xl font-bold text-yellow-500 flex items-center justify-center gap-2 mb-6 hidden">
+                    +10 POIN <i class="ph-fill ph-star"></i>
+                </div>
+                <button onclick="nextQuestion()" class="btn-3d w-full bg-primary text-white py-3 rounded-2xl font-bold text-lg shadow-btn">
+                    LANJUT <i class="ph-bold ph-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="screen-result" class="hidden absolute inset-0 z-30 bg-white flex flex-col h-full overflow-hidden">
+            <!-- Confetti Canvas -->
+            <canvas id="confetti-canvas" class="absolute inset-0 pointer-events-none z-0"></canvas>
+            
+            <div class="z-10 flex-1 flex flex-col items-center justify-center p-6 text-center overflow-y-auto">
+                <h2 class="text-3xl font-black text-primary mb-2" id="result-heading">HASIL PETUALANGAN</h2>
+                
+                <div id="solo-result" class="w-full">
+                    <div class="relative w-32 h-32 mx-auto mb-4">
+                        <i class="ph-fill ph-star text-[8rem] text-yellow-400 absolute inset-0 flex items-center justify-center drop-shadow-xl animate-bounce-slow"></i>
+                    </div>
+                    <h3 id="result-title" class="text-2xl font-bold text-emerald-600 mb-1">Gelar</h3>
+                    <p id="result-name" class="text-lg font-bold text-gray-700 mb-4 bg-gray-100 py-1 px-4 rounded-full inline-block">Nama</p>
+                    
+                    <div class="bg-blue-50 rounded-3xl p-5 mb-6 w-full shadow-inner border border-blue-100">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-500 font-bold">SKOR AKHIR</p>
+                                <p id="result-score" class="text-3xl font-black text-primary">0</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 font-bold">BENAR</p>
+                                <p id="result-correct" class="text-3xl font-black text-secondary">0/12</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="duel-result" class="hidden w-full">
+                    <div class="text-center mb-6">
+                        <i class="ph-fill ph-trophy text-6xl text-yellow-500 drop-shadow-lg mb-2"></i>
+                        <h3 class="text-xl font-bold text-gray-600">PEMENANG</h3>
+                        <h2 id="winner-name" class="text-3xl font-black text-primary bg-yellow-100 inline-block px-6 py-2 rounded-2xl mt-2 border-2 border-yellow-300">Nama</h2>
+                    </div>
+
+                    <div class="flex gap-4 w-full">
+                        <div class="flex-1 bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+                            <p id="duel-res-p1-name" class="font-bold text-emerald-700 truncate">P1</p>
+                            <p id="duel-res-p1-score" class="text-2xl font-black text-emerald-600">0</p>
+                            <p class="text-xs font-bold text-emerald-500 mt-1">Skor</p>
+                        </div>
+                        <div class="flex-1 bg-orange-50 rounded-2xl p-4 border border-orange-100">
+                            <p id="duel-res-p2-name" class="font-bold text-orange-700 truncate">P2</p>
+                            <p id="duel-res-p2-score" class="text-2xl font-black text-orange-600">0</p>
+                            <p class="text-xs font-bold text-orange-500 mt-1">Skor</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full flex flex-col gap-3 mt-6">
+                    <button onclick="navTo('screen-menu')" class="btn-3d w-full bg-primary text-white py-4 rounded-2xl font-bold text-xl shadow-btn flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-house"></i> MENU UTAMA
+                    </button>
+                    <button onclick="navTo('screen-leaderboard')" class="btn-3d w-full bg-purple-500 text-white py-3 rounded-2xl font-bold text-lg shadow-btn flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-trophy"></i> PAPAN SKOR
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-leaderboard" class="hidden flex-col h-full w-full bg-purple-50">
+            <div class="bg-purple-600 p-6 pb-8 rounded-b-3xl shadow-md text-white text-center relative">
+                <button onclick="navTo('screen-menu')" class="absolute top-6 left-4 p-2 bg-white/20 rounded-full hover:bg-white/30 backdrop-blur-sm transition">
+                    <i class="ph-bold ph-arrow-left text-xl"></i>
+                </button>
+                <i class="ph-fill ph-trophy text-5xl text-yellow-300 drop-shadow-md mb-2 mt-2"></i>
+                <h2 class="text-2xl font-black tracking-wide">PAPAN SKOR</h2>
+                <p class="text-purple-200 text-sm font-medium mt-1">Pemain Terbaik SDN KUNINGAN 03</p>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 -mt-4 z-10">
+                <div class="bg-white rounded-3xl shadow-lg border border-purple-100 overflow-hidden min-h-[300px]">
+                    <div id="leaderboard-loading" class="flex flex-col items-center justify-center h-48 text-purple-400">
+                        <i class="ph-bold ph-spinner animate-spin text-3xl mb-2"></i>
+                        <p class="font-bold">Memuat Data...</p>
+                    </div>
+                    <div id="leaderboard-empty" class="hidden flex flex-col items-center justify-center h-48 text-gray-400">
+                        <i class="ph-fill ph-ghost text-4xl mb-2"></i>
+                        <p class="font-bold">Belum ada data skor.</p>
+                        <p class="text-sm">Jadilah yang pertama!</p>
+                    </div>
+                    <ul id="leaderboard-list" class="hidden divide-y divide-gray-100">
+                        <!-- List injected here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Alerts (replacing window.alert) -->
+        <div id="custom-alert" class="hidden absolute inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-6 text-center max-w-sm w-full shadow-2xl animate-pop">
+                <i class="ph-fill ph-warning-circle text-5xl text-orange-500 mb-3"></i>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Perhatian</h3>
+                <p id="alert-message" class="text-gray-600 mb-6 font-medium"></p>
+                <button onclick="document.getElementById('custom-alert').classList.add('hidden')" class="btn-3d w-full bg-primary text-white py-3 rounded-2xl font-bold text-lg shadow-btn">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Environment variables setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'petualangan-iman-01';
+        let app, db, auth, currentUser;
+
+        try {
+            if (typeof __firebase_config !== 'undefined') {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // Auth logic respecting strict rule 3
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                        currentUser = auth.currentUser;
+                        console.log("Firebase Auth Success", currentUser.uid);
+                    } catch (e) {
+                        console.error("Auth Error:", e);
+                    }
+                };
+                initAuth();
+            }
+        } catch(e) {
+            console.error("Firebase init failed, continuing in offline mode", e);
+        }
+
+        const bankSoal = [
+            { q: "Rukun Iman ada berapa perkara?", options: ["5", "6", "4", "7"], a: 1, exp: "Rukun Iman ada 6, sedangkan Rukun Islam ada 5." },
+            { q: "Rukun Iman yang pertama adalah beriman kepada...", options: ["Malaikat", "Kitab", "Allah SWT", "Rasul"], a: 2, exp: "Iman kepada Allah adalah dasar dari semua keimanan kita." },
+            { q: "Siapakah pencipta alam semesta ini?", options: ["Manusia", "Malaikat", "Allah SWT", "Nabi"], a: 2, exp: "Allah SWT adalah Al-Khaliq, Sang Maha Pencipta seluruh alam semesta." },
+            { q: "Malaikat diciptakan Allah dari apa?", options: ["Tanah", "Api", "Cahaya (Nur)", "Air"], a: 2, exp: "Malaikat diciptakan dari cahaya, jin dari api, dan manusia dari tanah." },
+            { q: "Malaikat yang bertugas menyampaikan wahyu adalah...", options: ["Mikail", "Jibril", "Israfil", "Izrail"], a: 1, exp: "Malaikat Jibril bertugas menyampaikan wahyu kepada para Nabi dan Rasul." },
+            { q: "Al-Qur'an diturunkan kepada Nabi...", options: ["Musa a.s", "Isa a.s", "Ibrahim a.s", "Muhammad SAW"], a: 3, exp: "Al-Qur'an adalah kitab suci terakhir yang diturunkan kepada Nabi Muhammad SAW." },
+            { q: "Kitab Taurat diturunkan kepada Nabi...", options: ["Musa a.s", "Daud a.s", "Isa a.s", "Muhammad SAW"], a: 0, exp: "Allah menurunkan Taurat kepada Nabi Musa, Zabur kepada Daud, Injil kepada Isa, dan Al-Qur'an kepada Muhammad." },
+            { q: "Orang yang diutus Allah untuk menyampaikan ajaran agama disebut...", options: ["Malaikat", "Rasul", "Wali", "Ulama"], a: 1, exp: "Rasul adalah manusia pilihan utusan Allah untuk menyampaikan wahyu kepada umatnya." },
+            { q: "Nabi dan Rasul terakhir penutup para nabi adalah...", options: ["Nabi Adam a.s", "Nabi Nuh a.s", "Nabi Isa a.s", "Nabi Muhammad SAW"], a: 3, exp: "Nabi Muhammad SAW adalah Khatamun Nabiyyin (Penutup para Nabi)." },
+            { q: "Hari hancurnya seluruh alam semesta disebut...", options: ["Hari Raya", "Hari Kiamat", "Hari Pahlawan", "Hari Lahir"], a: 1, exp: "Hari Kiamat adalah hari akhir zaman di mana seluruh alam semesta hancur." },
+            { q: "Meyakini adanya Hari Kiamat termasuk Rukun Iman ke...", options: ["3", "4", "5", "6"], a: 2, exp: "Urutannya: Allah, Malaikat, Kitab, Rasul, Hari Kiamat, Qada dan Qadar." },
+            { q: "Ketentuan atau takdir Allah disebut...", options: ["Rezeki", "Pahala", "Qada dan Qadar", "Dosa"], a: 2, exp: "Segala sesuatu yang terjadi di alam semesta ini adalah atas kehendak dan takdir Allah (Qada & Qadar)." },
+            { q: "Sikap kita jika mendapat musibah adalah...", options: ["Marah", "Menangis", "Sabar", "Mengejek"], a: 2, exp: "Kita harus sabar dan ikhlas karena itu adalah bagian dari takdir Allah." },
+            { q: "Allah bersifat Al-Ahad, artinya Allah Maha...", options: ["Esa (Satu)", "Besar", "Mengetahui", "Pengasih"], a: 0, exp: "Al-Ahad berarti Allah itu tunggal, tidak ada Tuhan selain Allah." },
+            { q: "Malaikat yang bertugas membagi rezeki dan menurunkan hujan adalah...", options: ["Jibril", "Mikail", "Rakib", "Atid"], a: 1, exp: "Malaikat Mikail diberi tugas oleh Allah untuk mengatur rezeki makhluk hidup." },
+            { q: "Malaikat Rakib dan Atid bertugas...", options: ["Meniup sangkakala", "Menjaga surga", "Mencatat amal", "Menjaga neraka"], a: 2, exp: "Rakib mencatat amal baik, Atid mencatat amal buruk." },
+            { q: "Kitab suci umat Islam adalah...", options: ["Taurat", "Zabur", "Injil", "Al-Qur'an"], a: 3, exp: "Al-Qur'an adalah pedoman hidup bagi seluruh umat Islam." },
+            { q: "Sifat wajib bagi Rasul yang artinya jujur atau benar adalah...", options: ["Siddiq", "Amanah", "Tabligh", "Fathonah"], a: 0, exp: "Siddiq (benar), Amanah (dapat dipercaya), Tabligh (menyampaikan), Fathonah (cerdas)." },
+            { q: "Malaikat yang bertugas menanyai di alam kubur adalah...", options: ["Munkar dan Nakir", "Rakib dan Atid", "Jibril dan Mikail", "Malik dan Ridwan"], a: 0, exp: "Munkar dan Nakir bertugas memberikan pertanyaan di alam kubur." },
+            { q: "Beriman kepada Qada dan Qadar adalah Rukun Iman ke...", options: ["3", "4", "5", "6"], a: 3, exp: "Ini adalah Rukun Iman yang terakhir (ke-6)." }
+        ];
+
+        // Global State
+        let gameState = {
+            mode: 'solo', // 'solo' or 'duel'
+            players: [],
+            questions: [],
+            currentQIdx: 0,
+            timer: 15,
+            interval: null,
+            turn: 0, // 0 for P1, 1 for P2 (Duel mode)
+            isAnswering: false
+        };
+
+        const TOTAL_QUESTIONS_SOLO = 12; // 2 for each rukun iman theme theoretically
+        const TOTAL_QUESTIONS_DUEL = 10; // 5 each
+
+        // Audio Synth Setup using Tone.js
+        let synth, synthCorrect, synthWrong;
+        const initAudio = () => {
+            if(synth) return; // already init
+            try {
+                synth = new Tone.PolySynth().toDestination();
+                synthCorrect = new Tone.Synth({
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.05, decay: 0.1, sustain: 0.3, release: 1 }
+                }).toDestination();
+                synthWrong = new Tone.Synth({
+                    oscillator: { type: "square" },
+                    envelope: { attack: 0.1, decay: 0.2, sustain: 0, release: 0.5 }
+                }).toDestination();
+                synthCorrect.volume.value = -10;
+                synthWrong.volume.value = -15;
+                synth.volume.value = -15;
+            } catch(e) { console.log("Audio not supported"); }
+        };
+
+        const playSound = (type) => {
+            if(!synth) return;
+            try {
+                const now = Tone.now();
+                if (type === 'click') synth.triggerAttackRelease("C5", "32n", now);
+                else if (type === 'correct') {
+                    synthCorrect.triggerAttackRelease("E5", "8n", now);
+                    synthCorrect.triggerAttackRelease("G5", "8n", now + 0.15);
+                    synthCorrect.triggerAttackRelease("C6", "4n", now + 0.3);
+                }
+                else if (type === 'wrong') synthWrong.triggerAttackRelease("C3", "4n", now);
+                else if (type === 'win') {
+                    synth.triggerAttackRelease(["C4", "E4", "G4"], "4n", now);
+                    synth.triggerAttackRelease(["F4", "A4", "C5"], "4n", now + 0.3);
+                    synth.triggerAttackRelease(["G4", "B4", "D5"], "4n", now + 0.6);
+                    synth.triggerAttackRelease(["C5", "E5", "G5", "C6"], "2n", now + 0.9);
+                }
+            } catch(e){}
+        };
+
+        // Custom Alert
+        const showAlert = (msg) => {
+            document.getElementById('alert-message').innerText = msg;
+            document.getElementById('custom-alert').classList.remove('hidden');
+        };
+
+        // Navigation
+        window.navTo = (screenId, params = {}) => {
+            playSound('click');
+            // Hide all screens
+            ['screen-splash', 'screen-menu', 'screen-mode-select', 'screen-objectives', 'screen-register', 'screen-instructions', 'screen-game', 'screen-result', 'screen-leaderboard']
+                .forEach(id => document.getElementById(id).classList.add('hidden'));
+            
+            // Show target
+            document.getElementById(screenId).classList.remove('hidden');
+            document.getElementById(screenId).classList.add('flex');
+
+            if (screenId === 'screen-register') {
+                gameState.mode = params.mode;
+                document.getElementById('reg-title').innerText = params.mode === 'solo' ? 'REGISTRASI SOLO' : 'REGISTRASI DUEL';
+                document.getElementById('player2-form').classList.toggle('hidden', params.mode === 'solo');
+                
+                // Clear inputs
+                ['p1-name', 'p1-class', 'p1-absen', 'p2-name', 'p2-class', 'p2-absen'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) el.value = '';
+                });
+            } else if (screenId === 'screen-leaderboard') {
+                loadLeaderboard();
+            }
+        };
+
+        window.initGame = async () => {
+            await Tone.start();
+            initAudio();
+            playSound('click');
+
+            const p1Name = document.getElementById('p1-name').value.trim();
+            const p1Class = document.getElementById('p1-class').value.trim();
+            
+            if(!p1Name || !p1Class) return showAlert("Lengkapi data Pemain 1 dulu ya!");
+
+            gameState.players = [{
+                name: p1Name, className: p1Class, score: 0, correct: 0, stars: 0
+            }];
+
+            if (gameState.mode === 'duel') {
+                const p2Name = document.getElementById('p2-name').value.trim();
+                const p2Class = document.getElementById('p2-class').value.trim();
+                if(!p2Name || !p2Class) return showAlert("Lengkapi data Pemain 2 dulu ya!");
+                gameState.players.push({
+                    name: p2Name, className: p2Class, score: 0, correct: 0, stars: 0
+                });
+            }
+
+            // Shuffle and pick questions
+            const shuffled = [...bankSoal].sort(() => 0.5 - Math.random());
+            const neededQ = gameState.mode === 'solo' ? TOTAL_QUESTIONS_SOLO : TOTAL_QUESTIONS_DUEL;
+            gameState.questions = shuffled.slice(0, neededQ);
+            
+            gameState.currentQIdx = 0;
+            gameState.turn = 0;
+            
+            setupGameUI();
+            navTo('screen-game');
+            loadQuestion();
+        };
+
+        const setupGameUI = () => {
+            const isDuel = gameState.mode === 'duel';
+            document.getElementById('duel-header').classList.toggle('hidden', !isDuel);
+            document.getElementById('turn-indicator').classList.toggle('hidden', !isDuel);
+            document.getElementById('solo-score-container').classList.toggle('hidden', isDuel);
+            
+            if (isDuel) {
+                document.getElementById('duel-p1-name').innerText = gameState.players[0].name;
+                document.getElementById('duel-p2-name').innerText = gameState.players[1].name;
+                updateDuelScores();
+                
+                // For duel, simplify stars display globally or hide them. Let's hide the global stars container.
+                document.getElementById('star-container').classList.add('hidden');
+            } else {
+                document.getElementById('game-score').innerText = "0";
+                document.getElementById('star-container').classList.remove('hidden');
+                renderStars(0);
+            }
+        };
+
+        const renderStars = (count) => {
+            const container = document.getElementById('star-container');
+            container.innerHTML = '';
+            for(let i=0; i<6; i++) {
+                const isEarned = i < count;
+                container.innerHTML += `<i class="ph-fill ph-star text-2xl ${isEarned ? 'star-active animate-pop' : 'star-inactive'}"></i>`;
+            }
+        };
+
+        const updateDuelScores = () => {
+            if(gameState.mode !== 'duel') return;
+            document.getElementById('duel-p1-score').innerText = gameState.players[0].score;
+            document.getElementById('duel-p2-score').innerText = gameState.players[1].score;
+            
+            const p1Card = document.getElementById('duel-p1-card');
+            const p2Card = document.getElementById('duel-p2-card');
+            
+            if(gameState.turn === 0) {
+                p1Card.classList.replace('border-transparent', 'border-emerald-500');
+                p2Card.classList.replace('border-orange-500', 'border-transparent');
+                p1Card.classList.add('bg-emerald-50');
+                p2Card.classList.remove('bg-orange-50');
+                document.getElementById('turn-name').innerText = gameState.players[0].name;
+                document.getElementById('turn-name').parentElement.className = "bg-emerald-100 text-emerald-700 font-bold px-4 py-1 rounded-full text-sm animate-pulse";
+            } else {
+                p2Card.classList.replace('border-transparent', 'border-orange-500');
+                p1Card.classList.replace('border-emerald-500', 'border-transparent');
+                p2Card.classList.add('bg-orange-50');
+                p1Card.classList.remove('bg-emerald-50');
+                document.getElementById('turn-name').innerText = gameState.players[1].name;
+                document.getElementById('turn-name').parentElement.className = "bg-orange-100 text-orange-700 font-bold px-4 py-1 rounded-full text-sm animate-pulse";
+            }
+        };
+
+        const loadQuestion = () => {
+            gameState.isAnswering = false;
+            const q = gameState.questions[gameState.currentQIdx];
+            const totalQ = gameState.questions.length;
+            
+            document.getElementById('game-question-counter').innerText = `Soal ${gameState.currentQIdx + 1} / ${totalQ}`;
+            document.getElementById('game-progress').style.width = `${((gameState.currentQIdx) / totalQ) * 100}%`;
+            
+            document.getElementById('question-text').innerText = q.q;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            // Generate options with letters A, B, C, D
+            const letters = ['A', 'B', 'C', 'D'];
+            const colors = ['bg-blue-500', 'bg-rose-500', 'bg-yellow-500', 'bg-emerald-500'];
+            const hoverColors = ['hover:bg-blue-400', 'hover:bg-rose-400', 'hover:bg-yellow-400', 'hover:bg-emerald-400'];
+            
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `btn-3d w-full text-left p-4 rounded-2xl font-bold text-white shadow-btn flex items-center gap-4 ${colors[idx]} ${hoverColors[idx]}`;
+                btn.innerHTML = `
+                    <div class="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+                        ${letters[idx]}
+                    </div>
+                    <span class="text-lg">${opt}</span>
+                `;
+                btn.onclick = () => handleAnswer(idx);
+                optionsContainer.appendChild(btn);
+            });
+
+            if (gameState.mode === 'duel') updateDuelScores();
+
+            // Start Timer
+            gameState.timer = 15;
+            document.getElementById('game-timer').innerText = gameState.timer;
+            clearInterval(gameState.interval);
+            gameState.interval = setInterval(() => {
+                gameState.timer--;
+                document.getElementById('game-timer').innerText = gameState.timer;
+                if(gameState.timer <= 3) document.getElementById('game-timer').classList.add('animate-ping');
+                else document.getElementById('game-timer').classList.remove('animate-ping');
+
+                if (gameState.timer <= 0) {
+                    clearInterval(gameState.interval);
+                    document.getElementById('game-timer').classList.remove('animate-ping');
+                    handleAnswer(-1); // Time out
+                }
+            }, 1000);
+        };
+
+        const handleAnswer = (selectedIdx) => {
+            if (gameState.isAnswering) return;
+            gameState.isAnswering = true;
+            clearInterval(gameState.interval);
+            document.getElementById('game-timer').classList.remove('animate-ping');
+
+            const q = gameState.questions[gameState.currentQIdx];
+            const isCorrect = selectedIdx === q.a;
+            
+            const currentPlayer = gameState.players[gameState.turn];
+
+            if (isCorrect) {
+                playSound('correct');
+                currentPlayer.score += 10;
+                currentPlayer.correct += 1;
+                
+                // Logic stars for solo: 12 questions, need 2 correct to get 1 star
+                if (gameState.mode === 'solo') {
+                    currentPlayer.stars = Math.min(6, Math.floor(currentPlayer.correct / (TOTAL_QUESTIONS_SOLO / 6)));
+                    renderStars(currentPlayer.stars);
+                    document.getElementById('game-score').innerText = currentPlayer.score;
+                }
+            } else {
+                playSound('wrong');
+            }
+
+            showFeedback(isCorrect, q.exp);
+        };
+
+        const showFeedback = (isCorrect, exp) => {
+            const modal = document.getElementById('feedback-modal');
+            const card = document.getElementById('feedback-card');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const expText = document.getElementById('feedback-explanation');
+            const points = document.getElementById('feedback-points');
+
+            modal.classList.remove('hidden');
+            
+            // Trigger reflow for animation
+            void card.offsetWidth; 
+            card.classList.replace('opacity-0', 'opacity-100');
+            card.classList.replace('scale-90', 'scale-100');
+
+            if (isCorrect) {
+                icon.innerHTML = '🎉';
+                title.innerText = 'BENAR!';
+                title.className = "text-3xl font-black mb-2 text-emerald-500";
+                points.classList.remove('hidden');
+            } else {
+                icon.innerHTML = '😅';
+                title.innerText = 'KURANG TEPAT';
+                title.className = "text-3xl font-black mb-2 text-rose-500";
+                points.classList.add('hidden');
+            }
+            expText.innerText = exp;
+        };
+
+        window.nextQuestion = () => {
+            playSound('click');
+            const modal = document.getElementById('feedback-modal');
+            const card = document.getElementById('feedback-card');
+            
+            card.classList.replace('opacity-100', 'opacity-0');
+            card.classList.replace('scale-100', 'scale-90');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                
+                gameState.currentQIdx++;
+                
+                if (gameState.mode === 'duel') {
+                    // Switch turn
+                    gameState.turn = gameState.turn === 0 ? 1 : 0;
+                }
+
+                if (gameState.currentQIdx < gameState.questions.length) {
+                    loadQuestion();
+                } else {
+                    endGame();
+                }
+            }, 300);
+        };
+
+        const endGame = async () => {
+            playSound('win');
+            navTo('screen-result');
+            drawConfetti();
+
+            const isSolo = gameState.mode === 'solo';
+            document.getElementById('solo-result').classList.toggle('hidden', !isSolo);
+            document.getElementById('duel-result').classList.toggle('hidden', isSolo);
+
+            if (isSolo) {
+                const p = gameState.players[0];
+                const percentage = (p.correct / TOTAL_QUESTIONS_SOLO) * 100;
+                let gelar = "🌱 Terus Belajar";
+                let colorClass = "text-gray-500";
+                if (percentage >= 90) { gelar = "👑 Master Rukun Iman"; colorClass = "text-yellow-600"; }
+                else if (percentage >= 80) { gelar = "🏆 Hebat Sekali"; colorClass = "text-emerald-600"; }
+                else if (percentage >= 70) { gelar = "⭐ Jago Rukun Iman"; colorClass = "text-blue-600"; }
+                else if (percentage >= 60) { gelar = "🌟 Pejuang Iman"; colorClass = "text-purple-600"; }
+
+                document.getElementById('result-title').innerText = gelar;
+                document.getElementById('result-title').className = `text-2xl font-bold mb-1 ${colorClass}`;
+                document.getElementById('result-name').innerText = p.name;
+                document.getElementById('result-score').innerText = p.score;
+                document.getElementById('result-correct').innerText = `${p.correct}/${TOTAL_QUESTIONS_SOLO}`;
+
+                // Save to Firestore Leaderboard
+                await saveScoreToDb(p, percentage);
+
+            } else {
+                const p1 = gameState.players[0];
+                const p2 = gameState.players[1];
+                let winnerName = "SERI!";
+                if (p1.score > p2.score) winnerName = p1.name;
+                else if (p2.score > p1.score) winnerName = p2.name;
+
+                document.getElementById('winner-name').innerText = winnerName;
+                document.getElementById('duel-res-p1-name').innerText = p1.name;
+                document.getElementById('duel-res-p1-score').innerText = p1.score;
+                document.getElementById('duel-res-p2-name').innerText = p2.name;
+                document.getElementById('duel-res-p2-score').innerText = p2.score;
+            }
+        };
+
+        const saveScoreToDb = async (player, percentage) => {
+            if (!db || !currentUser) return; // Silent skip if no db
+            try {
+                // Rule 1: Strict paths for public data
+                const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                await addDoc(lbRef, {
+                    uid: currentUser.uid,
+                    name: player.name,
+                    className: player.className,
+                    score: player.score,
+                    correct: player.correct,
+                    percentage: percentage,
+                    timestamp: serverTimestamp()
+                });
+            } catch (e) {
+                console.error("Error saving score", e);
+            }
+        };
+
+        const loadLeaderboard = async () => {
+            const listEl = document.getElementById('leaderboard-list');
+            const loadingEl = document.getElementById('leaderboard-loading');
+            const emptyEl = document.getElementById('leaderboard-empty');
+            
+            listEl.classList.add('hidden');
+            emptyEl.classList.add('hidden');
+            loadingEl.classList.remove('hidden');
+
+            if (!db || !currentUser) {
+                // Mock data if no DB
+                loadingEl.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+                emptyEl.innerHTML = "<p>Database offline (Mode pratinjau).</p>";
+                return;
+            }
+
+            try {
+                // Rule 2: Simple query, fetch and then sort in memory to avoid index requirements
+                const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                const q = query(lbRef); // removed orderBy and limit as per Rule 2 constraints
+                const snapshot = await getDocs(q);
+                
+                let scores = [];
+                snapshot.forEach(doc => {
+                    scores.push({id: doc.id, ...doc.data()});
+                });
+
+                // Sort in memory descending by score
+                scores.sort((a, b) => b.score - a.score);
+                // Keep top 10
+                scores = scores.slice(0, 10);
+
+                loadingEl.classList.add('hidden');
+
+                if (scores.length === 0) {
+                    emptyEl.classList.remove('hidden');
+                } else {
+                    listEl.innerHTML = '';
+                    scores.forEach((s, idx) => {
+                        let rankIcon = `<div class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm">${idx+1}</div>`;
+                        if(idx === 0) rankIcon = `<div class="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center font-bold"><i class="ph-fill ph-medal text-xl"></i></div>`;
+                        if(idx === 1) rankIcon = `<div class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center font-bold"><i class="ph-fill ph-medal text-xl"></i></div>`;
+                        if(idx === 2) rankIcon = `<div class="w-8 h-8 rounded-full bg-orange-50 text-orange-700 flex items-center justify-center font-bold"><i class="ph-fill ph-medal text-xl"></i></div>`;
+
+                        listEl.innerHTML += `
+                            <li class="p-4 hover:bg-gray-50 flex items-center gap-4 transition-colors">
+                                ${rankIcon}
+                                <div class="flex-1">
+                                    <p class="font-bold text-gray-800 text-lg leading-tight">${s.name || 'Anonim'}</p>
+                                    <p class="text-xs text-gray-500">Kelas: ${s.className || '-'}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-black text-primary text-xl">${s.score}</p>
+                                    <p class="text-[10px] text-gray-400 font-bold uppercase">${s.correct}/12 Benar</p>
+                                </div>
+                            </li>
+                        `;
+                    });
+                    listEl.classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error("Error loading leaderboard", e);
+                loadingEl.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+                emptyEl.innerHTML = "<p>Gagal memuat papan skor.</p>";
+            }
+        };
+
+        const drawConfetti = () => {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#fce18a', '#ff726d', '#b48def', '#f4306d'];
+            
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    w: Math.random() * 10 + 5,
+                    h: Math.random() * 10 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vy: Math.random() * 3 + 2,
+                    vx: Math.random() * 2 - 1,
+                    rot: Math.random() * 360,
+                    rotSpeed: Math.random() * 10 - 5
+                });
+            }
+
+            const render = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let active = false;
+                particles.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.rot += p.rotSpeed;
+                    if (p.y < canvas.height) active = true;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot * Math.PI / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    ctx.restore();
+                });
+
+                if (active && document.getElementById('screen-result').classList.contains('flex')) {
+                    requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height); // cleanup
+                }
+            };
+            render();
+        };
+
+        // Initialize Splash Screen
+        window.onload = () => {
+            setTimeout(() => {
+                navTo('screen-menu');
+            }, 2500); // Show splash for 2.5s
+        };
+    </script>
+</body>
+</html>
+```
